@@ -1,31 +1,43 @@
 <?php
 	include 'global.inc.php';
 
-	if(isset($_POST['redes-sociales']) && count($_POST['redes-sociales']) > 0 ){
-		$IPS = implode("\n",$_POST['redes-sociales']);
+	if(isset($_POST['lista']) && count($_POST['lista']) > 0 ){
 		
-		if(($redesNuevas = trim($_POST['agregar-redes-sociales'])) != 'dominio.com'){
-			print 'Agregando una nueva IP<br />';
-			$IPS .= "\n".$redesNuevas;
+		if(($nuevoItem = trim($_POST['agregar-a-lista'])) != 'dominio.com'){
+			array_push($_POST['lista'], $nuevoItem);
 		}
 	
-		print 'Escribiendo las redes-sociales<br />';
-		print 'Para tomar en cuenta estos cambios.';	
-		file_put_contents(SQUID_REDES_SOCIALES,$IPS);
+		escribir(SQUID_REDES_SOCIALES,$_POST['lista']);
 	}
 
-	$archivo = file(SQUID_REDES_SOCIALES);
+	$archivo = leer(SQUID_REDES_SOCIALES);
 
-	$IPS = array();
+	$LISTA = array();
 	foreach ($archivo as $redes )  {
-	
-		$IPS[] = '<input type="checkbox" name="redes-sociales[]" value="'.trim($redes).'" checked/><b>'.trim($redes).'</b><br />';
+		if('' != trim($redes)){
+			$LISTA[] = "\t\t".'<input type="checkbox" name="lista[]" value="'.trim($redes).'" checked/><b>'.trim($redes).'</b><br />';
+		}
 
 	}
 
 ?>
+<div align="center">
+<fieldset style="align:center;text-align:left;width:400px">
+<legend>Paginas restringidas en horas de trabajo.</legend>
+<p>Las paginas aqui listadas, estaran restringidas para todos los usuarios menos aquellos que esten incluidos
+en la lista de usuarios <a href="ip.php" target="cuerpo">PRIVILEGIADOS</a>. Estas paginas estaran disponibles en un horario
+comprendido entre las 7:00AM a 8:00AM y 12:00PM a 1:00PM.
+</p>
 <form action="<?=$_SERVER['PHP_SELF'];?>" method="POST">
-	<input type="text" name="agregar-redes-sociales" value="dominio.com"> Ingrese el nombre de dominio sin www ni http:// <br />
-	<?=implode("\n\t",$IPS)."\n";?>
-	<input type="submit" />
+	Ingrese el nombre de dominio sin <b><i>www ni http://</b></i> <br />
+	<input type="text" name="agregar-a-lista" value="dominio.com"><br /><br />
+	
+	<fieldset style="align:center;text-align:left;width:200px">
+	<legend>Paginas restringidas actualmente</legend>
+<?=implode("\n",$LISTA)."\n";?>
+	</fieldset>
+	
+	<input type="submit" style=""/>
 </form>
+</fieldset>
+</div>

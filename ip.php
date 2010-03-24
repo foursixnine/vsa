@@ -1,31 +1,43 @@
 <?php
 	include 'global.inc.php';
 
-	if(isset($_POST['ip']) && count($_POST['ip']) > 0 ){
-		$IPS = implode("\n",$_POST['ip']);
+	if(isset($_POST['lista']) && count($_POST['lista']) > 0 ){
 		
-		if(($ipNueva = trim($_POST['agregar-ip'])) != '192.168.1.xx'){
-			print 'Agregando una nueva IP<br />';
-			$IPS .= "\n".$ipNueva;
+		if(($nuevoItem = trim($_POST['agregar-a-lista'])) != '000'){
+			array_push($_POST['lista'], '192.168.0.'.$nuevoItem);
 		}
 	
-		print 'Escribiendo las ips<br />';
-		print 'Para tomar en cuenta estos cambios.';	
-		file_put_contents(SQUID_LIBRES,$IPS);
+		escribir(SQUID_LIBRES,$_POST['lista']);
 	}
 
-	$archivo = file(SQUID_LIBRES);
+	$archivo = leer(SQUID_LIBRES);
 
-	$IPS = array();
-	foreach ($archivo as $ip )  {
-	
-		$IPS[] = '<input type="checkbox" name="ip[]" value="'.trim($ip).'" checked/><b>'.trim($ip).'</b><br />';
+	$LISTA = array();
+	foreach ($archivo as $redes )  {
+		if('' != trim($redes)){
+			$LISTA[] = "\t\t".'<input type="checkbox" name="lista[]" value="'.trim($redes).'" checked/><b>'.trim($redes).'</b><br />';
+		}
 
 	}
 
 ?>
+<div align="center">
+<fieldset style="align:center;text-align:left;width:400px">
+<legend>Direcciones IP PRIVILEGIADAS</legend>
+<p>Las direcciones IP aqui listadas, podran acceder a cualquier pagina <a href="paginas-bloqueadas.php" target="cuerpo">BLOQUEADA</a> o
+<a href="redes-sociales.php" target="cuerpo">RESTRINGIDA</a> sin ningun tipo de restricciones por Horario o Contenido.
+</p>
 <form action="<?=$_SERVER['PHP_SELF'];?>" method="POST">
-	<input type="text" name="agregar-ip" value="192.168.1.xx"> Direccion IP a agregar <br /
-	<?=implode("\n\t",$IPS)."\n";?>
-	<input type="submit">
+	Ingrese la direccion IP: <b><i>Solo el ultimo segmento.</b></i> <br />
+	
+	192.168.0.<input type="text" name="agregar-a-lista" value="000" maxlength="3"><br /><br />
+	
+	<fieldset style="align:center;text-align:left;width:200px">
+	<legend>Direcciones IP privilegiadas actualmente</legend>
+<?=implode("\n",$LISTA)."\n";?>
+	</fieldset>
+	
+	<input type="submit" style=""/>
 </form>
+</fieldset>
+</div>
